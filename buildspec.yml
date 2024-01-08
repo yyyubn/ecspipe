@@ -1,9 +1,10 @@
 version: 0.2
 
 env:
-  AWS_ECR: 727115173664.dkr.ecr.ap-northeast-2.amazonaws.com
-  IMAGE_REPO_NAME: ecspipe-image
-  CONTAINER_NAME: ecspipe-container
+  variables:
+    AWS_ECR: 176381617529.dkr.ecr.ap-northeast-2.amazonaws.com
+    IMAGE_REPO_NAME: ecspipe-image
+    CONTAINER_NAME: ecspipe-container
   
 phases:
 
@@ -17,13 +18,11 @@ phases:
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ECR/$IMAGE_REPO_NAME:$IMAGE_TAG
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ECR/$IMAGE_REPO_NAME:latest
-      
   post_build:
     commands:
       - docker push $AWS_ECR/$IMAGE_REPO_NAME:latest #이미지푸시
       - docker push $AWS_ECR/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $AWS_ECR/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json #ECS에 배포할 이미지정보를 json 형태로 저장.
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $AWS_ECR/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
 artifacts: 
   files: # 빌드후에 배포단계로 옮길 파일들.
-    - imagedefinitions.json #push된 이미지로부터 컨테이너를 배포하기 위함.
-
+    - imagedefinitions.json #push된 이미지로 부터 컨테이너를 배포하기 위함.
